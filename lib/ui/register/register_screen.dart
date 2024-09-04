@@ -1,16 +1,36 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:todo/FirebaseCode.dart';
+import 'package:todo/firebase/firestore_helper.dart';
+import 'package:todo/shared/auth_provider.dart';
+import 'package:todo/style/diloge_utils.dart';
 import 'package:todo/style/reusabale_componants/CustomFromFild.dart';
 import 'package:todo/style/reusabale_componants/constans.dart';
+import 'package:todo/ui/home/home_screen.dart';
+import 'package:todo/model/user.dart'as MyUser;
 
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
   static const String routeName = "Register";
+
+  const RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController fullName = TextEditingController();
+
   TextEditingController userName = TextEditingController();
-  TextEditingController email = TextEditingController();
-  TextEditingController password = TextEditingController();
+
+  TextEditingController emailControlar = TextEditingController();
+
+  TextEditingController passwordControlar = TextEditingController();
+
   TextEditingController passwordConfirmation = TextEditingController();
-  GlobalKey<FormState> formKey= GlobalKey<FormState>();
-  RegisterScreen({super.key});
+
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +42,10 @@ class RegisterScreen extends StatelessWidget {
         ),
       ),
       child: Scaffold(
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
+          backgroundColor: Theme.of(context).appBarTheme.backgroundColor!.withOpacity(0),
+          toolbarHeight: 60,
           title: Text(
             "Create Account",
             style: Theme.of(context).appBarTheme.titleTextStyle,
@@ -60,31 +83,32 @@ class RegisterScreen extends StatelessWidget {
                       },
                     ),
                     CustomFromField(
-                      controller: email,
+                      controller: emailControlar,
                       type: TextInputType.emailAddress,
                       lable: "Email",
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return "please Enter Password";
-                        }if(!isValidEmail(value)){
+                        }
+                        if (!isValidEmail(value)) {
                           return "Enter valid Email";
                         }
                         return null;
                       },
                     ),
                     CustomFromField(
-                      controller: password,
-                      isPassword: true,
-                      lable: "Password",
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "please Enter Password";
-                        }if(value.length<6){
-                          return "password Must Contain at least Character ";
-                        }
-                        return null;
-                      }
-                    ),
+                        controller: passwordControlar,
+                        isPassword: true,
+                        lable: "Password",
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "please Enter Password";
+                          }
+                          if (value.length < 6) {
+                            return "password Must Contain at least Character ";
+                          }
+                          return null;
+                        }),
                     CustomFromField(
                       controller: passwordConfirmation,
                       isPassword: true,
@@ -93,14 +117,15 @@ class RegisterScreen extends StatelessWidget {
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return "please Enter Your Name";
-                        }if(value.length<6){
+                        }
+                        if (value.length < 6) {
                           return "password Must Contain at least Character ";
-                        }if(value != password.text){
+                        }
+                        if (value != passwordControlar.text) {
                           return "Password Don't Match";
                         }
                         return null;
                       },
-
                     ),
                     const SizedBox(
                       height: 35,
@@ -141,7 +166,61 @@ class RegisterScreen extends StatelessWidget {
     );
   }
 
-  CreateAccount(){
-    formKey.currentState?.validate();
+  CreateAccount() async {
+    Authprovider provider = Provider.of<Authprovider>(context,listen: false);
+    if (formKey.currentState?.validate() ?? false) {
+      try {
+        DialogUtils.showLoadingDialog(context: context);
+        final credential =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: emailControlar.text.trim(),
+          password: passwordControlar.text,
+        );
+        FirestoreHelper.AddUser(
+            emailControlar.text,
+            fullName.text,
+            credential.user!.uid,
+        );
+        Navigator.pop(context);
+        DialogUtils.showMessageDialog(
+            context: context,
+            message: "Account Created SuccessFull ${credential.user?.email??""}",
+            onPress: () {
+              provider.setUsers(credential.user, MyUser.User(
+                  id: credential.user!.uid,
+                  fullname: fullName.text,
+                  email:  emailControlar.text,));
+              Navigator.pushNamedAndRemoveUntil(context, HomeScreen.routeName, (route)=>false);
+            });
+        print(credential.user?.email);
+      } on FirebaseAuthException catch (e) {
+        if (e.code == weakPass) {
+          Navigator.pop(context);
+          DialogUtils.showMessageDialog(
+              context: context,
+              message: 'The password provided is too weak.',
+              onPress: () {
+                Navigator.pop(context);
+              });
+        } else if (e.code == emailUsed) {
+          Navigator.pop(context);
+          DialogUtils.showMessageDialog(
+              context: context,
+              message: 'The account already exists for that email.',
+              onPress: () {
+                Navigator.pop(context);
+              });
+        }
+      } catch (e) {
+        Navigator.pop(context);
+        DialogUtils.showMessageDialog(
+            context: context,
+            message: '${e.toString()}',
+            onPress: () {
+              Navigator.pop(context);
+            },
+        );
+      }
+    }
   }
 }
