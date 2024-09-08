@@ -44,8 +44,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
+          elevation: 0,
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor!.withOpacity(0),
-          toolbarHeight: 60,
           title: Text(
             "Create Account",
             style: Theme.of(context).appBarTheme.titleTextStyle,

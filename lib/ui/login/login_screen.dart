@@ -39,8 +39,8 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
+          elevation: 0,
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor!.withOpacity(0),
-          toolbarHeight: 60,
           title: Text(
             "Login",
             style: Theme.of(context).appBarTheme.titleTextStyle,
@@ -48,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         body: Center(
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsetsDirectional.symmetric(horizontal: 20),
             child: SingleChildScrollView(
               child: Form(
                 key: formKey,
@@ -144,7 +144,8 @@ class _LoginScreenState extends State<LoginScreen> {
         );
 
         MyUser.User? user = await FirestoreHelper.GetUser(credential.user!.uid);
-        provider.setUsers(credential.user, user);
+        provider.setUsers(credential.user!, user!);
+        print("user name: ${user?.fullname}");
         Navigator.pop(context);
         Navigator.pushReplacementNamed(context, HomeScreen.routeName);
       } on FirebaseAuthException catch (e) {
