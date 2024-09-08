@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 
 class AppStyle{
   static const Color primaryLigh = Color(0xff3598DB);
+  static const Color primaryDark = Color(0xff060E1E);
   static ThemeData lightMode = ThemeData(
 
-    scaffoldBackgroundColor: Colors.transparent,
-    appBarTheme: AppBarTheme(
-      backgroundColor: Colors.transparent,
+    scaffoldBackgroundColor: const Color(0xffDFECDB),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: primaryLigh,
+      toolbarHeight: 160,
       centerTitle: true,
       titleTextStyle: TextStyle(
         color: Colors.white,
@@ -18,10 +20,10 @@ class AppStyle{
         color: Colors.white,
       ),
     ),
-    iconTheme: IconThemeData(
+    iconTheme: const IconThemeData(
       color: Colors.white,
     ),
-    textTheme: TextTheme(
+    textTheme: const TextTheme(
       headlineLarge: TextStyle(
         color: Colors.white,
         fontFamily: "Poppins",
@@ -36,6 +38,25 @@ class AppStyle{
     colorScheme: ColorScheme.fromSeed(
       seedColor: primaryLigh,
     primary: primaryLigh,
+    ),
+  );
+
+  static ThemeData darkMode = ThemeData(
+    scaffoldBackgroundColor: primaryDark,
+    textTheme: const TextTheme(
+      headlineLarge: TextStyle(
+        color: Colors.white,
+        fontFamily: "Poppins",
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+      labelMedium: TextStyle(
+        fontSize: 20,
+      ),
+    ),
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: primaryDark,
+      primary: primaryDark,
     ),
   );
 }
