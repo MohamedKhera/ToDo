@@ -31,12 +31,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppStyle.lightMode,
+      themeMode: ThemeMode.light,
       routes: {
+        SplashScreen.routeName:(_)=>SplashScreen(),
         RegisterScreen.routeName: (_) => RegisterScreen(),
         LoginScreen.routeName: (_) => LoginScreen(),
         HomeScreen.routeName: (_) => HomeScreen(),
       },
-      initialRoute: LoginScreen.routeName,
+      initialRoute: SplashScreen.routeName,
     );
   }
 }
